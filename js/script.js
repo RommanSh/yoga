@@ -70,7 +70,9 @@ window.addEventListener('DOMContentLoaded', function() {
             function addZero(num) {
                 if(num <= 9) {
                     return '0' + num;
-                } else return num;
+                } else {
+                    return num;
+                }
             }
 
             hours.textContent = addZero(t.hours);
@@ -79,7 +81,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
             if(t.total <= 0) {
                 clearInterval(timeInterval);
-                hourse.textContent = '00';
+                hours.textContent = '00';
                 minutes.textContent = '00';
                 seconds.textContent = '00';
             }
@@ -105,4 +107,50 @@ window.addEventListener('DOMContentLoaded', function() {
         more.classList.remove('more-splash');
         document.body.style.overflow = '';
     });
+
+    /* Form */
+
+    let message = {
+        loading : 'Загрузка...',
+        success : 'Спасибо! Скоро мы с вами свяжимся!',
+        failure : 'Что-то пошло не так...'
+    };
+
+    let form = document.getElementById('form'),
+        mainForm = document.querySelector('.main-form'),
+        input = form.getElementsByTagName('input'),
+        statuseMessage = document.createElement('div');
+
+    statuseMessage.classList.add('status');
+
+    function sendForm(form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            form.appendChild(statuseMessage);
+
+            let request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+            request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+            let formData = new FormData(form);
+            request.send(formData);
+
+            request.addEventListener('readystatechange', function() {
+                if(request.readyState < 4) {
+                    statuseMessage.innerHTML = message.loading;
+                } else if(request.readyState === 4 && request.status == 200) {
+                    statuseMessage.innerHTML = message.success;
+                } else {
+                    statuseMessage.innerHTML = message.failure;
+                }
+            });
+
+            for(let i = 0; i < input.length; i++) {
+                input[i].value = '';
+            }
+        });
+    }
+
+    sendForm(form);
+    sendForm(mainForm);
 });
